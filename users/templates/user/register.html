@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head></head>
+
+<body>
+    <form action={% url 'register' %} method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Salvar" />
+    </form>
+</body>
+
+</html>

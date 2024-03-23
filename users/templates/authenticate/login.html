@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head></head>
+
+<body>
+    <form action={% url 'login' %} method="POST">
+        {% csrf_token %}
+        <label>Usuário:</label>
+        <input type="text" name="username" />
+        <label>Senha:</label>
+        <input type="password" name="password" />
+        <input type="submit" value="Logar" />
+    </form>
+</body>
+
+</html>
