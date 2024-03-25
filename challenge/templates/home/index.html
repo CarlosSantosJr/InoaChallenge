@@ -1,8 +1,33 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head></head>
-  <body>
-    <div>{{ request.user.email }}</div>
-    <div></div>
-  </body>
+
+<head></head>
+
+<body>
+    <div>
+        <h1>User: {{ request.user.username }}</h1>
+        <h1>Email: {{ request.user.email }}</h1>
+    </div>
+    <div>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div>
+                <label>Nome do Ativo:</label>
+                <input type="text" name="asset_name" />
+            </div>
+            <input type="submit" name="add" value="Adicionar" />
+        </form>
+        <div>
+            <h2>Ativos Selecionados:</h2>
+            {% for user_asset in user_assets %}
+            <a href={% url 'asset_page' user_asset.asset.asset_id %}>
+                <div>
+                    <h3>Ação: {{ user_asset.asset.name }} - {{ user_asset.asset.company_name }}</h3>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+
 </html>

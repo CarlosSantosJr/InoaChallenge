@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head></head>
+  <body>
+    <h1>{{ asset.name }}</h1>
+    <h2>{{ asset.company_name }}</h2>
+    {% for asset_new in asset_news %}
+    <a href="{{ asset_new.source }}">
+      <h4>{{ asset_new.headline }}</h4>
+      <h4>{{ asset_new.publish_date }}</h4>
+    </a>
+    {% endfor %}
+  </body>
+</html>

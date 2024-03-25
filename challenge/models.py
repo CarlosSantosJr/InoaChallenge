@@ -5,21 +5,22 @@ from django.contrib.auth.models import User
 
 class Asset(models.Model):
   asset_id = models.AutoField(primary_key=True)
-  name = models.CharField(max_length=255)
+  name = models.CharField(max_length=10)
+  company_name = models.CharField(max_length=255, blank=True)
 
 
 class UserAsset(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-  interval = models.IntegerField()
-  superior_limit = models.FloatField()
-  inferior_limit = models.FloatField()
+  interval = models.IntegerField(blank=True)
+  superior_limit = models.DecimalField(max_digits=20, decimal_places=2, blank=True)
+  inferior_limit = models.DecimalField(max_digits=20, decimal_places=2, blank=True)
 
 
 class AssetHistory(models.Model):
   asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
   timestamp = models.DateTimeField(default=timezone.now)
-  value = models.DecimalField(max_digits=10, decimal_places=2)
+  value = models.DecimalField(max_digits=20, decimal_places=2)
 
 
 class AssetNews(models.Model):
