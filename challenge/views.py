@@ -7,6 +7,7 @@ import yfinance as yf
 
 from .models import UserAsset
 from .models import AssetNews
+from .models import AssetHistory
 from .models import Asset
 
 
@@ -33,15 +34,20 @@ def index(request):
                 )
                 user_asset.save()
 
-                # end_date = datetime.now().strftime('%Y-%m-%d')
-                # asset_history = asset_info.history(period='max',end=end_date,interval='1m')
+                end_date = datetime.now().strftime('%Y-%m-%d')
+                asset_history = asset_info.history(period='max',end=end_date,interval='1m')
 
-                # print("HISTORY")
-                # print(asset_history)
-                # for history_value in asset_history:
+                for index, row in asset_history.iterrows():
+                    asset_history = AssetHistory(asset=asset, timestamp=index, value=row['Close'])
+                    asset_history.save()
 
                 for new in asset_info.news:
-                    asset_new = AssetNews(asset=asset, headline=new['title'], source=new['link'], publish_date="2024-03-25")
+                    asset_new = AssetNews(
+                        asset=asset,
+                        headline=new['title'],
+                        source=new['link'],
+                        publish_date=datetime.fromtimestamp(new['providerPublishTime']).strftime('%Y-%m-%d')
+                    )
                     asset_new.save()
 
 
@@ -65,6 +71,7 @@ def asset_page(request, asset_id):
         asset = Asset.objects.filter(asset_id=asset_id)[0]
         user_asset = UserAsset.objects.filter(asset=asset,user=request.user)[0]
         asset_news = AssetNews.objects.filter(asset=asset)
+        asset_history = AssetHistory.objects.filter(asset=asset)
 
         return render(
             request,
@@ -73,6 +80,7 @@ def asset_page(request, asset_id):
                 'asset': asset,
                 'user_asset': user_asset,
                 'asset_news': asset_news,
+                'asset_history': asset_history,
             }
         )
     except:
