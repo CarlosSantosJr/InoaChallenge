@@ -1,9 +1,8 @@
-<!doctype html>
-<html lang="pt-BR">
+{% extends 'base.html' %}
 
-<head></head>
+{% block title %} Home {% endblock %}
 
-<body>
+{% block content %}
     <form action={% url 'login' %} method="POST">
         {% csrf_token %}
         <label>Usuário:</label>
@@ -12,6 +11,4 @@
         <input type="password" name="password" />
         <input type="submit" value="Logar" />
     </form>
-</body>
-
-</html>
+{% endblock %}

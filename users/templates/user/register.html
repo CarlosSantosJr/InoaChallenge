@@ -1,14 +1,11 @@
-<!doctype html>
-<html lang="pt-BR">
+{% extends 'base.html' %}
 
-<head></head>
+{% block title %} Home {% endblock %}
 
-<body>
+{% block content %}
     <form action={% url 'register' %} method="POST">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Salvar" />
     </form>
-</body>
-
-</html>
+{% endblock %}
