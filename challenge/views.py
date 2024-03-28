@@ -2,8 +2,9 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import HttpResponse
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import yfinance as yf
+from decimal import Decimal
 
 from .models import UserAsset
 from .models import AssetNews
@@ -76,24 +77,44 @@ def index(request):
 
 def asset_page(request, asset_id):
 
-    try:
-        asset = Asset.objects.filter(asset_id=asset_id)[0]
-        user_asset = UserAsset.objects.filter(asset=asset,user=request.user)[0]
-        asset_news = AssetNews.objects.filter(asset=asset)
-        asset_history = AssetHistory.objects.filter(asset=asset)
+    data = []
+    labels = []
 
-        return render(
-            request,
-            'asset_page/asset.html',
-            {
-                'asset': asset,
-                'user_asset': user_asset,
-                'asset_news': asset_news,
-                'asset_history': asset_history,
-            }
-        )
-    except:
-        return redirect('home')
+    if request.user.is_authenticated:
+        try:
+            today = date.today()
+            seven_day_before = today - timedelta(days=7)
+
+            asset = Asset.objects.filter(asset_id=asset_id)[0]
+            user_asset = UserAsset.objects.filter(asset=asset, user=request.user)[0]
+            asset_history = AssetHistory.objects.filter(asset=asset, timestamp__gte=seven_day_before)
+
+            if request.method == 'POST':
+                user_asset.interval = request.POST['interval']
+                user_asset.superior_limit = Decimal(request.POST['superior'].replace(',','.'))
+                user_asset.inferior_limit = Decimal(request.POST['inferior'].replace(',','.'))
+
+                user_asset.save()
+
+            for i in range(0, len(asset_history), user_asset.interval):
+                data.append(str(asset_history[i].value))
+                labels.append(asset_history[i].timestamp.strftime("%d/%m/%Y %H:%M"))
+                print("{} - {}".format(str(asset_history[i].value), asset_history[i].timestamp.strftime("%d/%m/%Y %H:%M")))
+        
+            return render(
+                request,
+                'asset_page/asset.html',{
+                    'asset': asset,
+                    'user_asset': user_asset,
+                    'data': data,
+                    'labels': labels,
+                }
+            )
+
+        except:
+            messages.error(request, 'Não foi possível carregar informacoes do ativo')
+ 
+    return redirect('home')        
 
 
 def remove_asset(request, asset_id):

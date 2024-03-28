@@ -13,13 +13,13 @@
                     <label for="firstName" class="form-label">Adicionar Ativo:</label>
                     <input type="text" class="form-control" name="asset_name" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
                     <div class="text-center">
-                        <input type="submit" name="add" value="Adicionar" class="btn btn-sm btn-outline-primary mt-3 mb-3"/>
+                        <input type="submit" name="add" value="Adicionar" class="btn btn-sm btn-primary mt-3 mb-3"/>
                     </div>
                 </form>
             </div>
         </div>
         
-        <div class="album py-5 bg-body-tertiary">
+        <div class="album py-5">
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                     {% for user_asset in user_assets %}
@@ -29,7 +29,7 @@
                                     <p class="card-text">{{ user_asset.asset.name }} - {{ user_asset.asset.company_name }}</p>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group">
-                                            <a href={% url 'asset_page' user_asset.asset.asset_id %} class="btn btn-sm btn-outline-primary">Editar/Ver</a>
+                                            <a href={% url 'asset_page' user_asset.asset.asset_id %} class="btn btn-sm btn-outline-primary">Ver/Editar</a>
                                             <a href={% url 'remove_asset' user_asset.asset.asset_id %} class="btn btn-sm btn-outline-danger">Remover</a>
                                         </div>
                                         <small class="text-body-secondary">R$ {{ asset_prices|get_item:user_asset.asset.asset_id }}</small>

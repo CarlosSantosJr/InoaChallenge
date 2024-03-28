@@ -3,15 +3,64 @@
 {% block title %} Home {% endblock %} 
 
 {% block content%}
+  <div class="container d-flex flex-column">
+    <div class="d-flex flex-row justify-content-center ">
+      <h3 class="mb-4">{{ asset.name }} - {{ asset.company_name }}</h3>
+    </div>
+    <form action={% url 'asset_page' user_asset.asset.asset_id %} method="post">
 
-<div>
-  <h1>{{ asset.name }}</h1>
-  <h2>{{ asset.company_name }}</h2>
-  {% for asset_new in asset_news %}
-  <a href="{{ asset_new.source }}">
-    <h4>{{ asset_new.headline }}</h4>
-    <h4>{{ asset_new.publish_date }}</h4>
-  </a>
-  {% endfor %}
-</div>
+      {% csrf_token %}
+      <div class="d-flex flex-row justify-content-around align-items-center border-top border-bottom pt-3 pb-4">
+
+        <div class="flex-column">
+          <label class="form-label">Intervalo (Minutos):</label>
+          <input type="text" class="form-control" name="interval" value="{{ user_asset.interval }}" pattern="[0-9]*">
+        </div>
+
+        <div class="flex-column">
+          <label class="form-label">Limite Inferior:</label>
+          <input type="text" class="form-control" name="inferior" value="{{ user_asset.inferior_limit }}" pattern="[0-9]*(\,[0-9]{2})*">
+        </div>
+
+        <div class="flex-column">
+          <label class="form-label">Limite Superior:</label>
+          <input type="text" class="form-control" name="superior" value="{{ user_asset.superior_limit }}" pattern="[0-9]*(\,[0-9]{2})*">
+        </div>
+
+        <div class="flex-column">
+          <input type="submit" class="btn btn-outline-primary" value="Alterar">
+        </div>
+
+      </div>
+
+    </form>
+
+    <div class="d-flex flex-row justify-content-center ">
+      <canvas id="myChart" width="500" height="180"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      const ctx = document.getElementById('myChart');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ labels|safe }},
+          datasets: [{
+            label: 'Preço da ação - Últimos 7 dias',
+            data: {{ data|safe }},
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    </script>
+  </div>
 {% endblock %}
