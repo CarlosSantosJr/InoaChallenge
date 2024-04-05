@@ -6,19 +6,6 @@
 
 {% block content %}
     <div>
-        <div class="container ">
-            <div class="h-100 d-flex align-items-center justify-content-center">
-                <form action="" method="post">
-                    {% csrf_token %}
-                    <label for="firstName" class="form-label">Adicionar Ativo:</label>
-                    <input type="text" class="form-control" name="asset_name" oninput="let p=this.selectionStart;this.value=this.value.toUpperCase();this.setSelectionRange(p, p);">
-                    <div class="text-center">
-                        <input type="submit" name="add" value="Adicionar" class="btn btn-sm btn-primary mt-3 mb-3"/>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
         <div class="album py-5">
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
@@ -32,7 +19,7 @@
                                             <a href={% url 'asset_page' user_asset.asset.asset_id %} class="btn btn-sm btn-outline-primary">Ver/Editar</a>
                                             <a href={% url 'remove_asset' user_asset.asset.asset_id %} class="btn btn-sm btn-outline-danger">Remover</a>
                                         </div>
-                                        <small class="text-body-secondary">R$ {{ asset_prices|get_item:user_asset.asset.asset_id }}</small>
+                                        <small class="text-body-secondary">{{ user_asset.asset.currency}} {{ asset_prices|get_item:user_asset.asset.asset_id }}</small>
                                     </div>
                                 </div>
                             </div>

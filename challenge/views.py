@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import HttpResponse
 from datetime import datetime, date, timedelta
+from django.utils import timezone
 import yfinance as yf
 from decimal import Decimal
 
@@ -26,27 +27,27 @@ def index(request):
                 else:
                     asset_list = Asset.objects.filter(name=asset_name)
                     if len(asset_list) == 0:
-                        asset = Asset(name=asset_name, company_name=asset_info.info['longName'])
+                        asset = Asset(name=asset_name, company_name=asset_info.info['longName'], currency=asset_info.info['financialCurrency'])
                         asset.save()
 
-                        end_date = datetime.now().strftime('%Y-%m-%d')
+                        end_date = timezone.now().strftime('%Y-%m-%d')
                         asset_history = asset_info.history(period='max',end=end_date,interval='1m')
 
                         for index, row in asset_history.iterrows():
+                            timestamp = str(index)
+                            timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')
+
+                            if timestamp.weekday() == 4:
+                                timestamp = timestamp + timedelta(days=3)
+                            else:
+                                timestamp = timestamp + timedelta(days=1)
+
                             asset_history = AssetHistory(asset=asset, timestamp=index, value=row['Close'])
                             asset_history.save()
 
-                        for new in asset_info.news:
-                            asset_new = AssetNews(
-                                asset=asset,
-                                headline=new['title'],
-                                source=new['link'],
-                                publish_date=datetime.fromtimestamp(new['providerPublishTime']).strftime('%Y-%m-%d')
-                            )
-                            asset_new.save()
                     else:
                         asset = asset_list[0]
-                        
+
                     user_asset = UserAsset(
                         user=request.user,
                         asset=asset,
@@ -82,25 +83,36 @@ def asset_page(request, asset_id):
 
     if request.user.is_authenticated:
         try:
-            today = date.today()
-            seven_day_before = today - timedelta(days=7)
+            if request.method == 'GET':
+                time_query = request.GET.get('time')
+                date_query = request.GET.get('date')
+            else:
+                time_query = request.POST.get('time')
+                date_query = request.POST.get('date')
+
+            if not time_query or not date_query:
+                time_query = "1"
+                date_query = "1"
+
+            today = datetime.today()
+            date_interval = today - timedelta(days=(int(date_query)))
 
             asset = Asset.objects.filter(asset_id=asset_id)[0]
             user_asset = UserAsset.objects.filter(asset=asset, user=request.user)[0]
-            asset_history = AssetHistory.objects.filter(asset=asset, timestamp__gte=seven_day_before)
+            asset_history = AssetHistory.objects.filter(asset=asset, timestamp__gte=date_interval)
 
             if request.method == 'POST':
-                user_asset.interval = request.POST['interval']
+                user_asset.interval = int(request.POST['interval'])
                 user_asset.superior_limit = Decimal(request.POST['superior'].replace(',','.'))
                 user_asset.inferior_limit = Decimal(request.POST['inferior'].replace(',','.'))
 
                 user_asset.save()
 
-            for i in range(0, len(asset_history), user_asset.interval):
+            for i in range(0, len(asset_history), int(time_query)):
+                timestamp = asset_history[i].timestamp - timedelta(hours=3)
                 data.append(str(asset_history[i].value))
-                labels.append(asset_history[i].timestamp.strftime("%d/%m/%Y %H:%M"))
-                print("{} - {}".format(str(asset_history[i].value), asset_history[i].timestamp.strftime("%d/%m/%Y %H:%M")))
-        
+                labels.append(timestamp.strftime("%d/%m/%Y %H:%M"))
+
             return render(
                 request,
                 'asset_page/asset.html',{
@@ -111,10 +123,11 @@ def asset_page(request, asset_id):
                 }
             )
 
-        except:
+        except Exception as e:
+            print(e)
             messages.error(request, 'Não foi possível carregar informacoes do ativo')
- 
-    return redirect('home')        
+
+    return redirect('home')
 
 
 def remove_asset(request, asset_id):
@@ -123,4 +136,4 @@ def remove_asset(request, asset_id):
         asset = Asset.objects.filter(asset_id=asset_id)[0]
         UserAsset.objects.filter(asset=asset, user=request.user)[0].delete()
 
-    return redirect('home') 
+    return redirect('home')

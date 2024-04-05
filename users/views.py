@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .forms import RegisterUserForm
 
 
 def login_user(request):
+
     if request.method == 'POST':
         username = request.POST["username"]
         password = request.POST["password"]
@@ -14,18 +16,20 @@ def login_user(request):
             login(request, user)
             return redirect('home')
         else:
-            messages.success(request, ('Usuario ou senha incorretos'))
+            messages.warning(request, 'Usuário ou Senha incorretos')
             return redirect('login')
     else:
         return render(request, 'authenticate/login.html', {})
 
 
 def logout_user(request):
+
     logout(request)
     return redirect('login')
 
 
 def register_user(request):
+
     if request.method == 'POST':
         form = RegisterUserForm(request.POST)
         if form.is_valid():
@@ -40,5 +44,10 @@ def register_user(request):
 
     return render(request, 'user/register.html', {'form': form,})
 
+
 def user_info(request):
-    pass
+    if request.method == 'POST':
+        request.user.email = request.POST['email']
+        request.user.save()
+
+    return render(request, 'user/info.html', {})

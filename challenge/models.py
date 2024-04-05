@@ -7,6 +7,7 @@ class Asset(models.Model):
   asset_id = models.AutoField(primary_key=True)
   name = models.CharField(max_length=10)
   company_name = models.CharField(max_length=255, blank=True)
+  currency = models.CharField(max_length=10, blank=True)
 
 
 class UserAsset(models.Model):
