@@ -3,7 +3,6 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.http import HttpResponse
 from datetime import datetime, date, timedelta
-from django.utils import timezone
 import yfinance as yf
 from decimal import Decimal
 
@@ -30,19 +29,20 @@ def index(request):
                         asset = Asset(name=asset_name, company_name=asset_info.info['longName'], currency=asset_info.info['financialCurrency'])
                         asset.save()
 
-                        end_date = timezone.now().strftime('%Y-%m-%d')
-                        asset_history = asset_info.history(period='max',end=end_date,interval='1m')
+                        end_date = datetime.now(tz=None).strftime('%Y-%m-%d')
+                        asset_history = asset_info.history(period='max', end=end_date, interval='1m')
 
                         for index, row in asset_history.iterrows():
                             timestamp = str(index)
                             timestamp = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')
+                            timestamp = timestamp.replace(tzinfo=None)
 
                             if timestamp.weekday() == 4:
                                 timestamp = timestamp + timedelta(days=3)
                             else:
                                 timestamp = timestamp + timedelta(days=1)
 
-                            asset_history = AssetHistory(asset=asset, timestamp=index, value=row['Close'])
+                            asset_history = AssetHistory(asset=asset, timestamp=timestamp, value=row['Close'])
                             asset_history.save()
 
                     else:
@@ -94,7 +94,7 @@ def asset_page(request, asset_id):
                 time_query = "1"
                 date_query = "1"
 
-            today = datetime.today()
+            today = datetime.now(tz=None)
             date_interval = today - timedelta(days=(int(date_query)))
 
             asset = Asset.objects.filter(asset_id=asset_id)[0]
@@ -105,13 +105,15 @@ def asset_page(request, asset_id):
                 user_asset.interval = int(request.POST['interval'])
                 user_asset.superior_limit = Decimal(request.POST['superior'].replace(',','.'))
                 user_asset.inferior_limit = Decimal(request.POST['inferior'].replace(',','.'))
+                user_asset.is_buy_sent = False
+                user_asset.is_sell_sent = False
 
                 user_asset.save()
 
             for i in range(0, len(asset_history), int(time_query)):
-                timestamp = asset_history[i].timestamp - timedelta(hours=3)
-                data.append(str(asset_history[i].value))
-                labels.append(timestamp.strftime("%d/%m/%Y %H:%M"))
+                if asset_history[i].timestamp <= today:
+                    data.append(str(asset_history[i].value))
+                    labels.append(asset_history[i].timestamp.strftime("%d/%m/%Y %H:%M"))
 
             return render(
                 request,

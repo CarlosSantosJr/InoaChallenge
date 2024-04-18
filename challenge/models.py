@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import timezone
+from datetime import datetime
 from django.contrib.auth.models import User
 
 
@@ -16,11 +16,14 @@ class UserAsset(models.Model):
   interval = models.IntegerField(blank=True)
   superior_limit = models.DecimalField(max_digits=20, decimal_places=2, blank=True)
   inferior_limit = models.DecimalField(max_digits=20, decimal_places=2, blank=True)
+  last_udpate = models.DateTimeField(default=datetime.now)
+  is_buy_sent = models.BooleanField(default=False)
+  is_sell_sent = models.BooleanField(default=False)
 
 
 class AssetHistory(models.Model):
   asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-  timestamp = models.DateTimeField(default=timezone.now)
+  timestamp = models.DateTimeField(default=datetime.now)
   value = models.DecimalField(max_digits=20, decimal_places=2)
 
 

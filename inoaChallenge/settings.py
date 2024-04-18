@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chartjs',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -113,7 +114,7 @@ TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -125,3 +126,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRONJOBS = [
+    ('* * * * *', 'challenge.cron.check_asset_prices', '>> ' + os.path.join(BASE_DIR,'log/assetPrices.log' + ' 2>&1 ')),
+    ('0 * * * *', 'challenge.cron.update_asset_history', '>> ' + os.path.join(BASE_DIR,'log/updateAssetPrices.log' + ' 2>&1 ')),
+]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = '<HOST>'
+EMAIL_PORT = '<PORT>'
+EMAIL_HOST_USER = '<USER>'
+EMAIL_HOST_PASSWORD = '<PASSWORD>'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
