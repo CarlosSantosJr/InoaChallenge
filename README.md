@@ -40,6 +40,13 @@ Na pasta em que o arquivo manage.py está, digite o comando abaixo para instalar
 python -m pip install -r requirements.txt
 ```
 
+Para configurar o banco de dados digite os comandos / To configure the database type the commands
+
+```
+python manage.py makemigrations challenge
+python manage.py migrate
+```
+
 Para adicionar os serviços de crontab necessarios digite / To add all the crontab services needed type
 
 ```
